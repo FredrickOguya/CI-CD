@@ -15,7 +15,7 @@ module.exports = [
   },
   js.configs.recommended,
   {
-    files: ['app.js', 'jest.setup.js', 'playwright.config.js'],
+    files: ['app.js', 'jest.setup.js'],
     languageOptions: {
       ecmaVersion: 2018,
       sourceType: 'commonjs',
@@ -73,5 +73,15 @@ module.exports = [
       'no-console': 'error',
       'react/prop-types': 0
     }
-  }
+  },
+  {
+    files: ['playwright.config.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: {
+        ...globals.node
+      }
+    }
+  },
 ]
