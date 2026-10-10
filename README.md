@@ -17,3 +17,5 @@ Start by running `npm install` inside the project folder
 
 
 **Deployed application:** https://fullstackopen-ci-cd-w3zm.onrender.com
+
+** Added Master protection **
