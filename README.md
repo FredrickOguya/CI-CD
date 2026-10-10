@@ -2,6 +2,9 @@
 
 This repository is used for the CI/CD module of the Full Stack Open course
 
+# Deployemnt
+It deploys automatic
+
 ## Commands
 
 Start by running `npm install` inside the project folder
