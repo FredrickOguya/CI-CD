@@ -58,3 +58,34 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BUMP: patch
+
+  notify_success:
+    needs: [simple_deployment_pipeline]
+    if: ${{ success() && github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' '), '#skip') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Discord about successfull deployment
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          status: success
+          title: "Deployment successful"
+          description: "A new version has been deployed to Render"
+
+  notify_failure:
+    needs: [simple_deployment_pipeline, tag_release]
+    if: ${{ failure() && github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Discord about failure
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          status: failure
+          title: "Build or deployment failed"
+          description: |
+            a job in deployment pipline has failed.
+            commit SHA: ${{ github.sha }}
+            Commit message: ${{ github.event.head_commit.message }}
+            Triggered by: ${{ github.actor }}
+            workflow run: ${{github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
