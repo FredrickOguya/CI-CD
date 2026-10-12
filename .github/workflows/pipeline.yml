@@ -9,11 +9,11 @@ on:
       - master
   
 jobs:
-  simple_deployment_pipeline:
+  tests:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v6
+
       - uses: actions/setup-node@v6
         with:
           node-version: '24'
@@ -27,6 +27,19 @@ jobs:
       - name: Run npm test
         run: npm run test
       
+  build_end_e2e:
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Install dependancies
+        run: npm install
+
       - name: Run npm build
         run: npm run build
 
@@ -35,15 +48,19 @@ jobs:
       
       - name: Run Paaywright tests
         run: npm run test:e2e
-
+  
+  deploy:
+    needs: build_end_e2e
+    if: ${{ github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' '), '#skip') }}
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy to Render
-        if: ${{ github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' '), '#skip') }}
         run: curl -fsS -X POST "$RENDER_DEPLOY_HOOK_URL"
         env:
           RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
 
   tag_release:
-    needs: [simple_deployment_pipeline]
+    needs: [deploy]
     if: ${{ github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' '), '#skip') }}
     runs-on: ubuntu-latest
     permissions:
@@ -60,7 +77,7 @@ jobs:
           DEFAULT_BUMP: patch
 
   notify_success:
-    needs: [simple_deployment_pipeline]
+    needs: [deploy]
     if: ${{ success() && github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' '), '#skip') }}
     runs-on: ubuntu-latest
     steps:
@@ -73,8 +90,8 @@ jobs:
           description: "A new version has been deployed to Render"
 
   notify_failure:
-    needs: [simple_deployment_pipeline, tag_release]
-    if: ${{ failure() && github.event_name == 'push' }}
+    needs: [tests, build_end_e2e, deploy, tag_release]
+    if: ${{ failure() }}
     runs-on: ubuntu-latest
     steps:
       - name: Notify Discord about failure
@@ -88,4 +105,4 @@ jobs:
             commit SHA: ${{ github.sha }}
             Commit message: ${{ github.event.head_commit.message }}
             Triggered by: ${{ github.actor }}
-            workflow run: ${{github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
