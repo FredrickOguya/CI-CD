@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - test-discord-failure
   pull_request:
     branches:
       - master
