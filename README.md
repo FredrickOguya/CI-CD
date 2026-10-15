@@ -19,3 +19,11 @@ Start by running `npm install` inside the project folder
 **Deployed application:** https://fullstackopen-ci-cd-w3zm.onrender.com
 
 ** Added Master protection **
+
+**LINK TO THE pokedex APP CREATED ON RENDER**
+
+https://fullstackopen-ci-cd-w3zm.onrender.com
+
+**The app repository to exercise 21 and 22** 
+
+https://github.com/FredrickOguya/the-phonebook-cicd
